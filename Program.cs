@@ -1,4 +1,4 @@
-﻿using PRG2_Assignment;
+
 using System;
 //Basic Feature 1
 // Load files and initialize dictionaries
@@ -115,7 +115,7 @@ static Dictionary<string, BoardingGate> LoadBoardingGates(string filePath)
 }
 
 //Basic feature 4
-static void ListAllBoardingGates(Dictionary<string, BoardingGate> gates)
+static void ListBoardingGates(Dictionary<string, BoardingGate> gates)
 {
     Console.Clear();
     Console.WriteLine("=============================================");
@@ -131,4 +131,4 @@ static void ListAllBoardingGates(Dictionary<string, BoardingGate> gates)
 
     Console.WriteLine("\nPress any key to return to the menu...");
     Console.ReadKey();
-}    
+}
