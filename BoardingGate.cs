@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +13,17 @@ namespace PRG2_Assignment
         public bool SupportsDDJB { get; set; }
         public bool SupportsLWTT { get; set; }
         public Flight Flight { get; set; }
+
+
+        //constructors
+        public BoardingGate() { }
+        public BoardingGate(string gateName, bool supportsCFFT, bool supportsDDJB, bool supportsLWTT)
+        {
+            GateName = gateName;
+            SupportsCFFT = supportsCFFT;
+            SupportsDDJB = supportsDDJB;
+            SupportsLWTT = supportsLWTT;
+        }
 
         public double CalculateFees()
         {
