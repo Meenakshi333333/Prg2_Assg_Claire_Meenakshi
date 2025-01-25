@@ -1,66 +1,46 @@
 using PRG2_Assignment;
 using System;
-//Basic Feature 1
-// Load files and initialize dictionaries
-Dictionary<string, Airline> airlineDictionary = LoadAirlines("airlines.csv");
-Dictionary<string, BoardingGate> boardingGateDictionary = LoadBoardingGates("boardinggates.csv");
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
-Console.WriteLine("Airlines loaded: " + airlineDictionary.Count);
-Console.WriteLine("Boarding gates loaded: " + boardingGateDictionary.Count);
+/*
+ BASIC INFO OF CASE SCENARIO:
+- flight plan (Flight num, Origin, Destination, Expected Departure/Arrival)
+- cannot have flights with same flight number on same day
+- flights are coordinated in sequence as of when they are received
+- when assigned. status becomes "On Time"
+- can only assign 1 boarding gate to 1 flight per day !!!!!!!!
 
-//Menu Loop
-while (true)
-{
-    Console.Clear();
-    Console.WriteLine("=============================================");
-    Console.WriteLine("Welcome to Changi" +
-        "Airport Terminal 5");
-    Console.WriteLine("=============================================");
-    Console.WriteLine("1. List All Flights");
-    Console.WriteLine("2. List Boarding Gates");
-    Console.WriteLine("3. Assign a Boarding Gate to a Flight");
-    Console.WriteLine("4. Create Flight");
-    Console.WriteLine("5. Display Airline Flights");
-    Console.WriteLine("6. Modify Flight Details");
-    Console.WriteLine("7. Display Flight Schedule");
-    Console.WriteLine("0. Exit");
-    Console.Write("\nPlease select your option: ");
+SPECIAL REQUEST CODES:
+1. DDJB (double-decker jet bridge requested)
+- A10, A11, A12, A13, A20, A21, A22, B10, B11, B12
+2. CFFT (connecting flight fast transfer requested)
+- B1, B2, B3 + All C Gates (C1 to C22)
+3. LWTT (Longer waiting time requested)
+- A1, A2, A20, A21, A22, C14, C15, C16 + All B Gates (B1 to B22)
 
-    string option = Console.ReadLine();
+CALCULATING FEES:
+* depends on (arriving/departing), (got request code?), base fee = $300
+A1. Arriving flight = $500
+A2. Departing flight = $800
+B. Base fee = $300
+C1. DDJB = $300
+C2. CFFT = $150
+C3. LWTT = $500
 
-    switch (option)
-    {
-        case "1":
-            ListAllFlights();
-            break;
-        case "2":
-            ListBoardingGates();
-            break;
-        case "3":
-            AssignBoardingGate();
-            break;
-        case "4":
-            CreateFlight();
-            break;
-        case "5":
-            DisplayAirlineFlights();
-            break;
-        case "6":
-            ModifyFlightDetails();
-            break;
-        case "7":
-            DisplayFlightSchedule();
-            break;
-        case "0":
-            Console.WriteLine("Goodbye!");
-            return;
-        default:
-            Console.WriteLine("Invalid option. Please try again.");
-            break;
-    }
-}
-}
+INCENTIVES TO AIRLINES:
+* promotions are stackable
+1. for every 3 arriving/departing flights = $350 discount
+2. more than 5 arriving/departing flights = 3% off total bill before any deductions
+3. flights that arrive/depart before 11am or after 9pm = $110 discount
+4. airlines with origin of DXB, BKK ot NRT = $25 discount
+5. no request codes = $50 discount
+ */
 
+//METHODS
+
+//LoadAirlines() - Meenakshi
 static Dictionary<string, Airline> LoadAirlines(string filePath)
 {
     Dictionary<string, Airline> airlines = new Dictionary<string, Airline>();
@@ -73,8 +53,8 @@ static Dictionary<string, Airline> LoadAirlines(string filePath)
             string[] parts = line.Split(',');
             if (parts.Length == 2)
             {
-                string code = parts[0].Trim();
-                string name = parts[1].Trim();
+                string name = parts[0].Trim();
+                string code = parts[1].Trim();
                 airlines[code] = new Airline(code, name);
             }
         }
@@ -87,6 +67,7 @@ static Dictionary<string, Airline> LoadAirlines(string filePath)
     return airlines;
 }
 
+//LoadBoardingGates() - Meenakshi
 static Dictionary<string, BoardingGate> LoadBoardingGates(string filePath)
 {
     Dictionary<string, BoardingGate> gates = new Dictionary<string, BoardingGate>();
@@ -114,6 +95,119 @@ static Dictionary<string, BoardingGate> LoadBoardingGates(string filePath)
 
     return gates;
 }
+
+//basic feature2 LoadFlights() - Claire
+static Dictionary<string, Flight> LoadFlights(string filename)
+{
+    Dictionary<string, Flight> flights = new Dictionary<string, Flight>();
+    using (StreamReader sr = new StreamReader(filename))
+    {
+        string? s = sr.ReadLine(); //heading
+        while (( s = sr.ReadLine())!= null)
+        {
+            string[] parts = s.Split(",");
+            string flightNumber = parts[0];
+            string origin = parts[1];
+            string destination = parts[2];
+            DateTime expectedTime = Convert.ToDateTime(parts[3]);
+            string request = parts[4];
+            if (request == "")
+            {
+                Flight flight = new NORMFlight(flightNumber, origin, destination, expectedTime);
+                flights[flightNumber] = flight;
+            }
+            else if (request == "LWTT")
+            {
+                Flight flight = new LWTTFlight(flightNumber, origin, destination, expectedTime);
+                flights[flightNumber] = flight;
+            }
+            else if (request == "DDJB")
+            {
+                Flight flight = new DDJBFlight(flightNumber, origin, destination, expectedTime);
+                flights[flightNumber] = flight;
+            }
+            else if (request == "CFFT")
+            {
+                Flight flight = new CFFTFlight(flightNumber, origin, destination, expectedTime);
+                flights[flightNumber] = flight;
+            }
+        }
+    }
+    return flights;
+}
+
+//Listing flights for basic feature 3 - Claire
+void ListAllFlights(Dictionary<string, Airline> airlineDictionary, Dictionary<string,Flight> flightDictionary)
+{
+    Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}","Flight Number", "Airline Name", "Origin", "Destination", "Expected Departure/Arrival Time");
+    foreach (KeyValuePair<string, Flight> flight in flightDictionary)
+    {
+        string flightnum = flight.Key;
+        Flight flightdets = flight.Value;
+        if (flightdets.FlightNumber.StartsWith("SQ"))
+        {
+            string airlineName = (airlineDictionary["SQ"]).Name;
+            Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", flightnum, airlineName, flightdets.Origin, flightdets.Destination, flightdets.ExpectedTime);
+        }
+        else if (flightdets.FlightNumber.StartsWith("MH"))
+        {
+            string airlineName = airlineDictionary["MH"].Name;
+            Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", flightnum, airlineName, flightdets.Origin, flightdets.Destination, flightdets.ExpectedTime);
+        }
+        else if (flightdets.FlightNumber.StartsWith("JL"))
+        {
+            string airlineName = airlineDictionary["JL"].Name;
+            Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", flightnum, airlineName, flightdets.Origin, flightdets.Destination, flightdets.ExpectedTime);
+        }
+        else if (flightdets.FlightNumber.StartsWith("CX"))
+        {
+            string airlineName = airlineDictionary["CX"].Name;
+            Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", flightnum, airlineName, flightdets.Origin, flightdets.Destination, flightdets.ExpectedTime);
+        }
+        else if (flightdets.FlightNumber.StartsWith("QF"))
+        {
+            string airlineName = airlineDictionary["QF"].Name;
+            Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", flightnum, airlineName, flightdets.Origin, flightdets.Destination, flightdets.ExpectedTime);
+        }
+        else if (flightdets.FlightNumber.StartsWith("TR"))
+        {
+            string airlineName = airlineDictionary["TR"].Name;
+            Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", flightnum, airlineName, flightdets.Origin, flightdets.Destination, flightdets.ExpectedTime);
+        }
+        else if (flightdets.FlightNumber.StartsWith("EK"))
+        {
+            string airlineName = airlineDictionary["EK"].Name;
+            Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", flightnum, airlineName, flightdets.Origin, flightdets.Destination, flightdets.ExpectedTime);
+        }
+        else if (flightdets.FlightNumber.StartsWith("BA"))
+        {
+            string airlineName = airlineDictionary["BA"].Name;
+            Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", flightnum, airlineName, flightdets.Origin, flightdets.Destination, flightdets.ExpectedTime);
+        }
+        else
+            Console.WriteLine("unknown flight found");
+    }
+}
+
+//PROGRAM CODE
+
+//Basic Feature 1
+// Load files and initialize dictionaries
+Console.WriteLine("Loading Airlines. . .");
+Dictionary<string, Airline> airlineDictionary = LoadAirlines("airlines.csv");
+Console.WriteLine("{0} Airlines Loaded!", airlineDictionary.Count);
+
+Console.WriteLine("Loading Boarding Gates. . .");
+Dictionary<string, BoardingGate> boardingGateDictionary = LoadBoardingGates("boardinggates.csv");
+Console.WriteLine("{0} Boarding Gates Loaded!", boardingGateDictionary.Count);
+
+//basic feature 2
+Console.WriteLine("Loading Flights. . .");
+Dictionary<string, Flight> flightDictionary = LoadFlights("flights.csv");
+Console.WriteLine("{0} Flights Loaded!", flightDictionary.Count);
+
+//basic feature 3
+ListAllFlights(airlineDictionary, flightDictionary);
 
 //Basic feature 4
 static void ListBoardingGates(Dictionary<string, BoardingGate> gates)
@@ -180,6 +274,7 @@ static void DisplayAirlineFlights()
     Console.WriteLine("\nPress any key to return to the menu...");
     Console.ReadKey();
 }
+
 //basic feature 8
 static void ModifyFlightDetails()
 {
@@ -307,4 +402,55 @@ static void ModifyFlightDetails()
 
     Console.WriteLine("\nPress any key to return to the menu...");
     Console.ReadKey();
+}
+
+//Menu Loop
+while (true)
+{
+    Console.Clear();
+    Console.WriteLine("=============================================");
+    Console.WriteLine("Welcome to Changi Airport Terminal 5");
+    Console.WriteLine("=============================================");
+    Console.WriteLine("1. List All Flights");
+    Console.WriteLine("2. List Boarding Gates");
+    Console.WriteLine("3. Assign a Boarding Gate to a Flight");
+    Console.WriteLine("4. Create Flight");
+    Console.WriteLine("5. Display Airline Flights");
+    Console.WriteLine("6. Modify Flight Details");
+    Console.WriteLine("7. Display Flight Schedule");
+    Console.WriteLine("0. Exit");
+    Console.Write("\nPlease select your option: ");
+
+    string option = Console.ReadLine();
+
+    switch (option)
+    {
+        case "1":
+            ListAllFlights();
+            break;
+        case "2":
+            ListBoardingGates();
+            break;
+        case "3":
+            AssignBoardingGate();
+            break;
+        case "4":
+            CreateFlight();
+            break;
+        case "5":
+            DisplayAirlineFlights();
+            break;
+        case "6":
+            ModifyFlightDetails();
+            break;
+        case "7":
+            DisplayFlightSchedule();
+            break;
+        case "0":
+            Console.WriteLine("Goodbye!");
+            return;
+        default:
+            Console.WriteLine("Invalid option. Please try again.");
+            break;
+    }
 }
