@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,11 +14,23 @@ namespace PRG2_Assignment
         public DateTime ExpectedTime { get; set; }
         public string Status { get; set; }
 
+        //constructors
+        public Flight() {}
+        public Flight(string flightNumber, string origin, string destination, DateTime expectedTime, string status = "On Time")
+        {
+            FlightNumber = flightNumber;
+            Origin = origin;
+            Destination = destination;
+            ExpectedTime = expectedTime;
+            Status = status;
+        }
+
+        //abstract method    
         public abstract double CalculateFees();
 
         public override string ToString()
         {
-            return $"Flight: {FlightNumber}, From: {Origin}, To: {Destination}, Status: {Status}";
+            return $"Flight: {FlightNumber}, From: {Origin}, To: {Destination}, Expected Departure/Arrival: {ExpectedTime}, Status: {Status}";
         }
     }
 }
