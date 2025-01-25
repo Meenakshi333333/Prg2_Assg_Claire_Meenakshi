@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,12 +14,11 @@ namespace PRG2_Assignment
         public Dictionary<string, BoardingGate> BoardingGates { get; set; }
         public Dictionary<string, double> GateFees { get; set; }
 
-        public Terminal()
+        public Terminal() { }
+        public Terminal(string terminalName, Dictionary<string, double> gateFees)
         {
-            Airlines = new Dictionary<string, Airline>();
-            Flights = new Dictionary<string, Flight>();
-            BoardingGates = new Dictionary<string, BoardingGate>();
-            GateFees = new Dictionary<string, double>();
+            TerminalName = terminalName;
+            GateFees = gateFees;
         }
 
         public bool AddAirline(Airline airline)
@@ -56,10 +55,10 @@ namespace PRG2_Assignment
 
         public void PrintAirlineFees()
         {
-            foreach (var airline in Airlines.Values)
-            {
-                Console.WriteLine($"Airline {airline.Name} Fees: {airline.CalculateFees()}");
-            }
+            //foreach (var airline in Airlines.Values)
+            //{
+            //    Console.WriteLine($"Airline {airline.Name} Fees: {airline.CalculateFees()}");
+            //}
         }
 
         public override string ToString()
@@ -68,3 +67,4 @@ namespace PRG2_Assignment
         }
     }
 }
+
