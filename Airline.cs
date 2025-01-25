@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,19 +12,26 @@ namespace PRG2_Assignment
         public string Code { get; set; }
         public Dictionary<string, Flight> Flights { get; set; }
 
-        public Airline()
+        //constructors
+        public Airline() { }
+        public Airline(string code, string name)
         {
-            Flights = new Dictionary<string, Flight>();
+            Code = code;
+            Name = name;
         }
 
+        //methods
         public bool AddFlight(Flight flight)
         {
-            if (!Flights.ContainsKey(flight.FlightNumber))
+            if (Flights.ContainsKey(flight.FlightNumber))
+            {
+                return false;
+            }
+            else
             {
                 Flights[flight.FlightNumber] = flight;
                 return true;
             }
-            return false;
         }
 
         public bool RemoveFlight(Flight flight)
