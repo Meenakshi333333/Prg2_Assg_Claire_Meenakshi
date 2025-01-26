@@ -13,7 +13,10 @@ namespace PRG2_Assignment
         public Dictionary<string, Flight> Flights { get; set; }
 
         //constructors
-        public Airline() { }
+        public Airline()
+        {
+            Flights = new Dictionary<string, Flight>();
+        }
         public Airline(string code, string name)
         {
             Code = code;

@@ -1,0 +1,15 @@
+C:\Users\User\source\repos\Prg2_Assg_Claire_Meenakshi\obj\Debug\net7.0\PRG2_Assignment.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\User\source\repos\Prg2_Assg_Claire_Meenakshi\obj\Debug\net7.0\PRG2_Assignment.AssemblyInfoInputs.cache
+C:\Users\User\source\repos\Prg2_Assg_Claire_Meenakshi\obj\Debug\net7.0\PRG2_Assignment.AssemblyInfo.cs
+C:\Users\User\source\repos\Prg2_Assg_Claire_Meenakshi\obj\Debug\net7.0\PRG2_Assignment.csproj.CoreCompileInputs.cache
+C:\Users\User\source\repos\Prg2_Assg_Claire_Meenakshi\obj\Debug\net7.0\PRG2_Assignment.sourcelink.json
+C:\Users\User\source\repos\Prg2_Assg_Claire_Meenakshi\bin\Debug\net7.0\PRG2_Assignment.exe
+C:\Users\User\source\repos\Prg2_Assg_Claire_Meenakshi\bin\Debug\net7.0\PRG2_Assignment.deps.json
+C:\Users\User\source\repos\Prg2_Assg_Claire_Meenakshi\bin\Debug\net7.0\PRG2_Assignment.runtimeconfig.json
+C:\Users\User\source\repos\Prg2_Assg_Claire_Meenakshi\bin\Debug\net7.0\PRG2_Assignment.dll
+C:\Users\User\source\repos\Prg2_Assg_Claire_Meenakshi\bin\Debug\net7.0\PRG2_Assignment.pdb
+C:\Users\User\source\repos\Prg2_Assg_Claire_Meenakshi\obj\Debug\net7.0\PRG2_Assignment.dll
+C:\Users\User\source\repos\Prg2_Assg_Claire_Meenakshi\obj\Debug\net7.0\refint\PRG2_Assignment.dll
+C:\Users\User\source\repos\Prg2_Assg_Claire_Meenakshi\obj\Debug\net7.0\PRG2_Assignment.pdb
+C:\Users\User\source\repos\Prg2_Assg_Claire_Meenakshi\obj\Debug\net7.0\PRG2_Assignment.genruntimeconfig.cache
+C:\Users\User\source\repos\Prg2_Assg_Claire_Meenakshi\obj\Debug\net7.0\ref\PRG2_Assignment.dll
