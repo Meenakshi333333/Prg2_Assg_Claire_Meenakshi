@@ -1,3 +1,9 @@
+//==========================================================
+// Student Number	: S10267951B
+// Student Name	: Claire Chan
+// Partner Name	: Senthilnathan Meeankshi
+//==========================================================
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +38,7 @@ namespace PRG2_Assignment
 
         public override string ToString()
         {
-            return $"BoardingGate: {GateName}, Flight: {Flight?.FlightNumber ?? "None"}";
+            return $"Boarding Gate Name: {GateName} \nSupports DDJB: {SupportsDDJB} \nSupports CFFT: {SupportsCFFT} \nSupports LWTT: {SupportsLWTT}";
         }
     }
 }
