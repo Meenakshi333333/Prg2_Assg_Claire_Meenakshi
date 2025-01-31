@@ -1,8 +1,17 @@
+//==========================================================
+// Student Number	: S10267951B
+// Student Name	: Claire Chan
+// Partner Name	: Senthilnathan Meeankshi
+//==========================================================
+
+
 using PRG2_Assignment;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 
 /*
  BASIC INFO OF CASE SCENARIO:
@@ -77,9 +86,10 @@ static Dictionary<string, BoardingGate> LoadBoardingGates(string filePath)
         {
             string[] parts = line.Split(',');
             if (parts.Length == 4)
-            {
+            {   
+                // meenakshi this part wrong, look at csv file and see the order of special request codes
                 string name = parts[0].Trim();
-                bool supportsCFFT = parts[1].Trim() == "true";
+                bool supportsCFFT = parts[1].Trim() == "true"; // should be == "True", now all become False
                 bool supportsDDJB = parts[2].Trim() == "true";
                 bool supportsLWTT = parts[3].Trim() == "true";
                 gates[name] = new BoardingGate(name, supportsCFFT, supportsDDJB, supportsLWTT);
@@ -101,7 +111,7 @@ static Dictionary<string, Flight> LoadFlights(string filename)
     using (StreamReader sr = new StreamReader(filename))
     {
         string? s = sr.ReadLine(); //heading
-        while (( s = sr.ReadLine())!= null)
+        while ((s = sr.ReadLine()) != null)
         {
             string[] parts = s.Split(",");
             string flightNumber = parts[0];
@@ -134,10 +144,10 @@ static Dictionary<string, Flight> LoadFlights(string filename)
     return flights;
 }
 
-//Listing flights for basic feature 3 - Claire
-void ListAllFlights(Dictionary<string, Airline> airlineDictionary, Dictionary<string,Flight> flightDictionary)
+// basic feature 3 -- Claire
+void ListAllFlights(Dictionary<string, Airline> airlineDictionary, Dictionary<string, Flight> flightDictionary)
 {
-    Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}","Flight Number", "Airline Name", "Origin", "Destination", "Expected Departure/Arrival Time");
+    Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", "Flight Number", "Airline Name", "Origin", "Destination", "Expected Departure/Arrival Time");
     foreach (KeyValuePair<string, Flight> flight in flightDictionary)
     {
         string flightnum = flight.Key;
@@ -187,27 +197,7 @@ void ListAllFlights(Dictionary<string, Airline> airlineDictionary, Dictionary<st
     }
 }
 
-//PROGRAM CODE
-
-//Basic Feature 1
-// Load files and initialize dictionaries
-Console.WriteLine("Loading Airlines. . .");
-Dictionary<string, Airline> airlineDictionary = LoadAirlines("airlines.csv");
-Console.WriteLine("{0} Airlines Loaded!", airlineDictionary.Count);
-
-Console.WriteLine("Loading Boarding Gates. . .");
-Dictionary<string, BoardingGate> boardingGateDictionary = LoadBoardingGates("boardinggates.csv");
-Console.WriteLine("{0} Boarding Gates Loaded!", boardingGateDictionary.Count);
-
-//basic feature 2
-Console.WriteLine("Loading Flights. . .");
-Dictionary<string, Flight> flightDictionary = LoadFlights("flights.csv");
-Console.WriteLine("{0} Flights Loaded!", flightDictionary.Count);
-
-//basic feature 3
-ListAllFlights(airlineDictionary, flightDictionary);
-
-//Basic feature 4
+//Basic feature 4 -- Meenakshi
 static void ListBoardingGates(Dictionary<string, BoardingGate> gates)
 {
     Console.Clear();
@@ -222,7 +212,7 @@ static void ListBoardingGates(Dictionary<string, BoardingGate> gates)
 
         if (gate.Flight != null)
         {
-            flight = gate.Flight.FlightNumber;  
+            flight = gate.Flight.FlightNumber;
         }
         Console.WriteLine(gate.GateName + "       " + gate.SupportsDDJB.ToString() + "       "
             + gate.SupportsCFFT.ToString() + "       " + gate.SupportsLWTT.ToString() + "       " + flight);
@@ -231,11 +221,111 @@ static void ListBoardingGates(Dictionary<string, BoardingGate> gates)
     Console.ReadKey();
 }
 
+//basic feature 5 -- Claire
+static void AssignBoardingGate(Dictionary<string, Flight> flightDictionary, Dictionary<string, BoardingGate> boardingGateDictionary)
+{
+    Console.WriteLine("=============================================");
+    Console.WriteLine("Assign a Boarding Gate to a Flight");
+    Console.WriteLine("=============================================");
+    Console.WriteLine("Enter Flight Number:");
+    string flightNumber = Console.ReadLine();
 
-//basic feature 7
+    // input validation for flightnum
+    while (flightDictionary.ContainsKey(flightNumber) == false || flightNumber == null)
+    {
+        Console.WriteLine("Flight number entered does not exist. Try Again.");
+        flightNumber = Console.ReadLine();
+    }
+
+
+    //loop
+    bool assigned = false;
+    do
+    {
+        Console.WriteLine("Enter Boarding Gate Name:");
+        string boardingGate = Console.ReadLine();
+
+        // input validation for boardinggate
+        while (boardingGateDictionary.ContainsKey(boardingGate) == false || boardingGate == null)
+        {
+            Console.WriteLine("Boarding gate entered does not exist. Try Again");
+            boardingGate = Console.ReadLine();
+        }
+
+        // find flight object
+        foreach (KeyValuePair<string, Flight> flight in flightDictionary)
+        {
+            string flightnum = flight.Key;
+            Flight Fobject = flight.Value;
+            if (flightNumber == flightnum)
+            {
+                Console.WriteLine(Fobject.ToString()); // print basic info of flights
+                foreach (KeyValuePair<string, BoardingGate> gate in boardingGateDictionary)
+                {
+                    string bgate = gate.Key;
+                    BoardingGate Bobject = gate.Value;
+                    if (boardingGate == bgate)
+                    {
+                        if (Bobject.Flight == null) // no assigned flight
+                        {
+                            Console.WriteLine(Bobject.ToString()); // print info of entered boarding gate
+                            Bobject.Flight = Fobject;
+                            Console.WriteLine("Would you like to update the status of the flight? (Y/N)");
+                            string changestatus = Console.ReadLine().ToUpper();
+                            if (changestatus == "Y")
+                            {
+                                Console.WriteLine("1. Delayed");
+                                Console.WriteLine("2. Boarding");
+                                Console.WriteLine("3. On Time");
+                                Console.WriteLine("Please select the new status of the flight:");
+                                string newstatus = Console.ReadLine();
+
+                                // input validation for user selection
+                                while (newstatus != "1" && newstatus != "2" && newstatus != "3")
+                                {
+                                    Console.WriteLine("Input entered not in options. Try Again.");
+                                    newstatus = Console.ReadLine();
+                                }
+
+                                if (newstatus == "1")
+                                {
+                                    Bobject.Flight.Status = "Delayed";
+                                }
+                                else if (newstatus == "2")
+                                {
+                                    Bobject.Flight.Status = "Boarding";
+                                }
+                                else // newstatus = 3
+                                {
+                                    Bobject.Flight.Status = "On Time";
+                                }
+                            }
+                            Console.WriteLine("Flight {0} has been assigned to Boarding Gate {1}!", flightnum, bgate);
+                            assigned = false; // get out of loop
+                        }
+                        else
+                        {
+                            assigned = true; // repeat loop
+                            Console.WriteLine("Boarding gate has already been assigned to a flight. Try Again.");
+                        }
+                    }
+                }
+            }
+        }
+    } while (assigned == true);
+    
+}
+
+
+
+
+
+
+
+
+//basic feature 7 -- Meenakshi
 static void DisplayAirlineFlights(Dictionary<string, Airline> airlineDictionary, Dictionary<string, Flight> flightDictionary)
 {
-    Console.Clear();
     Console.WriteLine("=============================================");
     Console.WriteLine("List of Airlines for Changi Airport Terminal 5");
     Console.WriteLine("=============================================");
@@ -282,7 +372,7 @@ static void DisplayAirlineFlights(Dictionary<string, Airline> airlineDictionary,
 }
 
 
-//basic feature 8
+//basic feature 8 -- Meenakshi
 
 static void ModifyFlightDetails(Dictionary<string, Airline> airlineDictionary)
 {
@@ -367,9 +457,9 @@ static void ModifyFlightDetails(Dictionary<string, Airline> airlineDictionary)
                             selectedFlight.BoardingGate = new BoardingGate
                             {
                                 GateName = gateName,
-                                SupportsCFFT = true,  
-                                SupportsDDJB = true, 
-                                SupportsLWTT = true   
+                                SupportsCFFT = true,
+                                SupportsDDJB = true,
+                                SupportsLWTT = true
                             };
 
                             break;
@@ -426,10 +516,7 @@ static void ModifyFlightDetails(Dictionary<string, Airline> airlineDictionary)
     Console.ReadKey();
 }
 
-static void AssignBoardingGate()
-{
 
-}
 static void CreateFlight()
 {
 
@@ -438,10 +525,37 @@ static void DisplayFlightSchedule()
 {
 
 }
+
+
+
+
+
+//PROGRAM CODE
+
+//Basic Feature 1 -- Meenakshi
+// Load files and initialize dictionaries
+Console.WriteLine("Loading Airlines. . .");
+Dictionary<string, Airline> airlineDictionary = LoadAirlines("airlines.csv");
+Console.WriteLine("{0} Airlines Loaded!", airlineDictionary.Count);
+
+Console.WriteLine("Loading Boarding Gates. . .");
+Dictionary<string, BoardingGate> boardingGateDictionary = LoadBoardingGates("boardinggates.csv");
+Console.WriteLine("{0} Boarding Gates Loaded!", boardingGateDictionary.Count);
+
+//basic feature 2 -- Claire
+Console.WriteLine("Loading Flights. . .");
+Dictionary<string, Flight> flightDictionary = LoadFlights("flights.csv");
+Console.WriteLine("{0} Flights Loaded!", flightDictionary.Count);
+
+
+
+
 // Menu Loop
-while (true)
+bool flag = true;
+do
 {
-    Console.Clear();
+    Console.WriteLine();
+    Console.WriteLine();
     Console.WriteLine("=============================================");
     Console.WriteLine("Welcome to Changi Airport Terminal 5");
     Console.WriteLine("=============================================");
@@ -457,39 +571,31 @@ while (true)
 
     string option = Console.ReadLine();
 
-    switch (option)
+    while (option != "1" && option != "2" && option != "3" && option != "4" && option != "5" && option != "6" && option != "7" && option != "0")
     {
-        case "1":
-            ListAllFlights(airlineDictionary, flightDictionary);
-            break;
-        case "2":
-            ListBoardingGates(boardingGateDictionary);
-            break;
-        case "3":
-            AssignBoardingGate();
-            break;
-        case "4":
-            CreateFlight();
-            break;
-        case "5":
-            DisplayAirlineFlights(airlineDictionary, flightDictionary);
-            break;
-        case "6":
-            ModifyFlightDetails(airlineDictionary);
-            break;
-        case "7":
-            DisplayFlightSchedule();
-            break;
-        case "0":
-            Console.WriteLine("Exiting...");
-            return;
-        default:
-            Console.WriteLine("Invalid option, please try again.");
-            break;
+        Console.WriteLine("\nInput invalid. Try Again.");
+        Console.Write("Please select your option: ");
+        option = Console.ReadLine();
     }
 
-    // Wait for user input to return to the menu
-    Console.WriteLine("\nPress any key to return to the menu...");
-    Console.ReadKey();
-}
-
+    if (option == "1")
+        ListAllFlights(airlineDictionary, flightDictionary);
+    else if (option == "2")
+        ListBoardingGates(boardingGateDictionary);
+    else if (option == "3")
+        AssignBoardingGate(flightDictionary, boardingGateDictionary);
+    else if (option == "4")
+        CreateFlight();
+    else if (option == "5")
+        DisplayAirlineFlights(airlineDictionary, flightDictionary);
+    else if (option == "6")
+        ModifyFlightDetails(airlineDictionary);
+    else if (option == "7")
+        DisplayFlightSchedule();
+    else
+    {
+        Console.WriteLine("Goodbye!");
+        flag = false;
+    }
+        
+} while (flag == true);
