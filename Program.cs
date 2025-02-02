@@ -7,11 +7,13 @@
 
 using PRG2_Assignment;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
 
 /*
  BASIC INFO OF CASE SCENARIO:
@@ -60,10 +62,10 @@ static Dictionary<string, Airline> LoadAirlines(string filePath)
         foreach (var line in lines.Skip(1))  // Skip header
         {
             var columns = line.Split(',');
-            string code = columns[0].Trim();
-            string name = columns[1].Trim();
+            string name = columns[0].Trim();
+            string code = columns[1].Trim();
 
-            airlineDictionary[code] = new Airline { Code = code, Name = name };
+            airlineDictionary[code] = new Airline(code,name);
         }
     }
     catch (Exception ex)
@@ -316,11 +318,177 @@ static void AssignBoardingGate(Dictionary<string, Flight> flightDictionary, Dict
     
 }
 
+// basic feature 6 -- Claire
 
+static void CreateFlight(Dictionary<string, Flight> flightDictionary, Dictionary<string, Airline> airlineDictionary)
+{
+    bool repeat = true;
+    while (repeat==true) // to add another flight loop
+    {
+        while (true)
+        {
+            // flight number + validation
+            Console.Write("Enter Flight Number: ");
+            string flightNumber = Console.ReadLine();
 
+            // flightnum validation
+            // check airline code
 
+            bool exists = false;
+            while (flightNumber==null)
+            {
+                Console.WriteLine("Invalid input. Try Again.");
+                Console.Write("Enter Flight Number: ");
+                flightNumber = Console.ReadLine();
+            }
 
+            List<string> airlinecodes = new List<string>(airlineDictionary.Keys);
+            foreach (string airlinecode in airlinecodes)
+            {
+                if (flightNumber.StartsWith(airlinecode))
+                {
+                    exists = true;
+                    break;
+                }
 
+            }
+            while (exists == false)
+            {
+                Console.WriteLine("Airline code is not in current database. Try Again.");
+
+                //repeat input + validation
+                Console.Write("Enter Flight Number: ");
+                flightNumber = Console.ReadLine();
+                while (flightNumber == null)
+                {
+                    Console.WriteLine("Invalid input. Try Again.");
+                    Console.Write("Enter Flight Number: ");
+                    flightNumber = Console.ReadLine();
+                }
+                foreach (string airlinecode in airlinecodes)
+                {
+                    if (flightNumber.StartsWith(airlinecode))
+                    {
+                        exists = true;
+                        break;
+                    }
+                    
+                }
+                
+            }
+
+            // other inputs
+            Console.Write("Enter Origin: ");
+            string origin = Console.ReadLine();
+            while (origin == null)
+            {
+                Console.WriteLine("Invalid input. Try Again.");
+                Console.Write("Enter Origin: ");
+                origin = Console.ReadLine();
+            }
+            Console.Write("Enter Destination: ");
+            string destination = Console.ReadLine();
+            while (destination == null)
+            {
+                Console.WriteLine("Invalid input. Try Again.");
+                Console.Write("Enter Destination: ");
+                destination = Console.ReadLine();
+            }
+            
+            bool format = false;
+
+            //type check
+            DateTime expectedTime = DateTime.Today;
+            while (format == false)
+            {
+                try
+                {
+                    Console.Write("Enter Expected Departure/Arrival Time (dd/mm/yyyy hh:mm): ");
+                    expectedTime = Convert.ToDateTime(Console.ReadLine());
+                    format = true;
+                    //check if got flight with same num on same day
+                    foreach (KeyValuePair<string, Flight> flight in flightDictionary)
+                    {
+                        string fnum = flight.Key;
+                        Flight Fobject = flight.Value;
+                        if (flightNumber == fnum)
+                        {
+                            if (expectedTime.Day == Fobject.ExpectedTime.Day)
+                            {
+                                Console.WriteLine("Flight with same number has already been assigned to this day. Try another day.");
+                                Console.Write("Enter Expected Departure/Arrival Time (dd/mm/yyyy hh:mm): ");
+                                format = false;
+                                break;
+                                
+                            }
+                        }
+                    }
+                    
+                    
+                }
+                catch (FormatException)
+                {
+                    Console.WriteLine("Invalid format entered. Try Again.");
+                }
+            }
+
+            //special request?
+            Console.Write("Enter Special Request Code (CFFT/DDJB/LWTT/None): ");
+            string request = Console.ReadLine();
+            while ((request != "CFFT" && request != "DDJB" && request != "LWTT" && request != "None") || request == null)
+            {
+                Console.WriteLine("Invalid input. Try Again.");
+                Console.Write("Enter Special Request Code (CFFT/DDJB/LWTT/None): ");
+                request = Console.ReadLine();
+            }
+            string code = "";
+            if (request == "None")
+            {
+                Flight flight = new NORMFlight(flightNumber, origin, destination, expectedTime);
+                flightDictionary[flightNumber] = flight;
+            }
+            else if (request == "LWTT")
+            {
+                Flight flight = new LWTTFlight(flightNumber, origin, destination, expectedTime);
+                flightDictionary[flightNumber] = flight;
+                code = "LWTT";
+            }
+            else if (request == "DDJB")
+            {
+                Flight flight = new DDJBFlight(flightNumber, origin, destination, expectedTime);
+                flightDictionary[flightNumber] = flight;
+                code = "DDJB";
+            }
+            else if (request == "CFFT")
+            {
+                Flight flight = new CFFTFlight(flightNumber, origin, destination, expectedTime);
+                flightDictionary[flightNumber] = flight;
+                code = "CFFT";
+            }
+
+            //write into csv file
+            using (StreamWriter sw = new StreamWriter("flights.csv", true))
+            {
+                sw.WriteLine("{0},{1},{2},{3},{4}", flightNumber, origin, destination, expectedTime, code);
+            }
+
+            Console.WriteLine($"Flight {flightNumber} has been added!");
+            Console.WriteLine("Would you like to add another flight? (Y/N): ");
+            string add = Console.ReadLine();
+            while ((add.ToUpper() != "Y" && add.ToUpper() != "N") || add==null)
+            {
+                Console.WriteLine("Invalid option. Try Again.");
+                add = Console.ReadLine();
+            }
+            if (add == "N")
+            {
+                repeat = false; // make it go back into the loop
+                break;
+            }
+        }
+
+    }
+}
 
 
 //basic feature 7 -- Meenakshi
@@ -517,10 +685,7 @@ static void ModifyFlightDetails(Dictionary<string, Airline> airlineDictionary)
 }
 
 
-static void CreateFlight()
-{
 
-}
 static void DisplayFlightSchedule()
 {
 
@@ -585,7 +750,7 @@ do
     else if (option == "3")
         AssignBoardingGate(flightDictionary, boardingGateDictionary);
     else if (option == "4")
-        CreateFlight();
+        CreateFlight(flightDictionary,airlineDictionary);
     else if (option == "5")
         DisplayAirlineFlights(airlineDictionary, flightDictionary);
     else if (option == "6")
@@ -599,3 +764,4 @@ do
     }
         
 } while (flag == true);
+
