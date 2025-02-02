@@ -1,7 +1,6 @@
 //==========================================================
 // Student Number	: S10267951B
 // Student Name	: Claire Chan
-// Partner Number	: S10267061F
 // Partner Name	: Senthilnathan Meeankshi
 //==========================================================
 
@@ -558,7 +557,7 @@ static void DisplayAirlineFlights(Dictionary<string, Airline> airlineDictionary,
 
 //basic feature 8 -- Meenakshi
 
-static void ModifyFlightDetails(Dictionary<string, Airline> airlineDictionary)
+static void ModifyFlightDetails(Dictionary<string, Airline> airlineDictionary, Dictionary<string, Flight> flightDictionary)
 {
     Console.WriteLine("=============================================");
     Console.WriteLine("List of Airlines for Changi Airport Terminal 5");
@@ -579,7 +578,17 @@ static void ModifyFlightDetails(Dictionary<string, Airline> airlineDictionary)
         Console.WriteLine($"\nList of Flights for {selectedAirline.Name}");
         Console.WriteLine("Flight Number  Airline Name  Origin          Destination      Expected ");
 
-        var airlineFlights = selectedAirline.Flights.Values.ToList(); // Get flights from the selected airline
+        // Get the list of flights for the selected airline (convert AirlineCode to uppercase to avoid case mismatch)
+        List<Flight> airlineFlights = new List<Flight>();
+        foreach (KeyValuePair<string, Flight> flights in flightDictionary)
+        {
+            string Fobject = flights.Key;
+            if (Fobject.StartsWith(airlineCode))
+            {
+                airlineFlights.Add(flights.Value);
+            }
+        }
+
 
         if (airlineFlights.Count == 0)
         {
@@ -817,7 +826,7 @@ do
     else if (option == "5")
         DisplayAirlineFlights(airlineDictionary, flightDictionary);
     else if (option == "6")
-        ModifyFlightDetails(airlineDictionary);
+        ModifyFlightDetails(airlineDictionary, flightDictionary);
     else if (option == "7")
         DisplayFlightSchedule(flightDictionary, airlineDictionary);
     else
