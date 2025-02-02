@@ -691,12 +691,62 @@ static void ModifyFlightDetails(Dictionary<string, Airline> airlineDictionary)
     Console.ReadKey();
 }
 
-
-static void DisplayFlightSchedule()
+// basic feature 9 -- Claire
+static void DisplayFlightSchedule(Dictionary<string, Flight> flightDictionary, Dictionary<string, Airline> airlineDictionary)
 {
+    Console.WriteLine("=============================================");
+    Console.WriteLine("Flight Schedule for Changi Airport Terminal 5");
+    Console.WriteLine("=============================================");
+    List<Flight> sortedflights = new List<Flight>(flightDictionary.Values);
+
+    sortedflights.Sort();
+
+    Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", "Flight Number", "Airline Name", "Origin", "Destination", "Expected Departure/Arrival Time");
+    foreach (Flight flight in sortedflights)
+    {
+        if (flight.FlightNumber.StartsWith("SQ"))
+        {
+            string airlineName = (airlineDictionary["SQ"]).Name;
+            Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}",flight.FlightNumber, airlineName, flight.Origin, flight.Destination, flight.ExpectedTime);
+        }
+        else if (flight.FlightNumber.StartsWith("MH"))
+        {
+            string airlineName = airlineDictionary["MH"].Name;
+            Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", flight.FlightNumber, airlineName, flight.Origin, flight.Destination, flight.ExpectedTime);
+        }
+        else if (flight.FlightNumber.StartsWith("JL"))
+        {
+            string airlineName = airlineDictionary["JL"].Name;
+            Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", flight.FlightNumber, airlineName, flight.Origin, flight.Destination, flight.ExpectedTime);
+        }
+        else if (flight.FlightNumber.StartsWith("CX"))
+        {
+            string airlineName = airlineDictionary["CX"].Name;
+            Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", flight.FlightNumber, airlineName, flight.Origin, flight.Destination, flight.ExpectedTime);
+        }
+        else if (flight.FlightNumber.StartsWith("QF"))
+        {
+            string airlineName = airlineDictionary["QF"].Name;
+            Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", flight.FlightNumber, airlineName, flight.Origin, flight.Destination, flight.ExpectedTime);
+        }
+        else if (flight.FlightNumber.StartsWith("TR"))
+        {
+            string airlineName = airlineDictionary["TR"].Name;
+            Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", flight.FlightNumber, airlineName, flight.Origin, flight.Destination, flight.ExpectedTime);
+        }
+        else if (flight.FlightNumber.StartsWith("EK"))
+        {
+            string airlineName = airlineDictionary["EK"].Name;
+            Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", flight.FlightNumber, airlineName, flight.Origin, flight.Destination, flight.ExpectedTime);
+        }
+        else if (flight.FlightNumber.StartsWith("BA"))
+        {
+            string airlineName = airlineDictionary["BA"].Name;
+            Console.WriteLine("{0,-16}{1,-23}{2,-23}{3,-23}{4,-22}", flight.FlightNumber, airlineName, flight.Origin, flight.Destination, flight.ExpectedTime);
+        }
+    }
 
 }
-
 
 
 //PROGRAM CODE
@@ -715,8 +765,6 @@ Console.WriteLine("{0} Boarding Gates Loaded!", boardingGateDictionary.Count);
 Console.WriteLine("Loading Flights. . .");
 Dictionary<string, Flight> flightDictionary = LoadFlights("flights.csv");
 Console.WriteLine("{0} Flights Loaded!", flightDictionary.Count);
-
-//Load the airline data from the CSV file into a dictionary
 
 
 
@@ -756,13 +804,13 @@ do
     else if (option == "3")
         AssignBoardingGate(flightDictionary, boardingGateDictionary);
     else if (option == "4")
-        CreateFlight(flightDictionary, airlineDictionary);
+        CreateFlight(flightDictionary,airlineDictionary);
     else if (option == "5")
         DisplayAirlineFlights(airlineDictionary, flightDictionary);
     else if (option == "6")
         ModifyFlightDetails(airlineDictionary);
     else if (option == "7")
-        DisplayFlightSchedule();
+        DisplayFlightSchedule(flightDictionary, airlineDictionary);
     else
     {
         Console.WriteLine("Goodbye!");
@@ -770,4 +818,3 @@ do
     }
         
 } while (flag == true);
-
