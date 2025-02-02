@@ -74,7 +74,6 @@ static Dictionary<string, Airline> LoadAirlines(string filePath)
     return airlineDictionary;
 }
 
-
 //LoadBoardingGates() - Meenakshi
 static Dictionary<string, BoardingGate> LoadBoardingGates(string filePath)
 {
@@ -103,7 +102,6 @@ static Dictionary<string, BoardingGate> LoadBoardingGates(string filePath)
     }
     return gates;
 }
-
 
 //basic feature2 LoadFlights() - Claire
 static Dictionary<string, Flight> LoadFlights(string filename)
@@ -548,8 +546,6 @@ static void DisplayAirlineFlights(Dictionary<string, Airline> airlineDictionary,
     {
         Console.WriteLine("Invalid Airline Code.");
     }
-
-    // Wait for user input to return to the menu
     Console.WriteLine("\nPress any key to return to the menu...");
     Console.ReadKey();
 }
@@ -589,7 +585,6 @@ static void ModifyFlightDetails(Dictionary<string, Airline> airlineDictionary, D
             }
         }
 
-
         if (airlineFlights.Count == 0)
         {
             Console.WriteLine("No flights found for this airline.");
@@ -598,9 +593,7 @@ static void ModifyFlightDetails(Dictionary<string, Airline> airlineDictionary, D
         {
             foreach (var flight in airlineFlights)
             {
-                Console.WriteLine(flight.FlightNumber + "  " + selectedAirline.Name + "  "
-                    + flight.Origin + "  " + flight.Destination + "  "
-                    + flight.ExpectedTime.ToString("dd/MM/yyyy hh:mm tt"));
+                Console.WriteLine(flight.FlightNumber + "  " + selectedAirline.Name + "  " + flight.Origin + "  " + flight.Destination + "  " + flight.ExpectedTime.ToString("dd/MM/yyyy hh:mm tt"));
             }
 
             Console.WriteLine("\nChoose an existing Flight to modify or delete:");
@@ -766,6 +759,73 @@ static void DisplayFlightSchedule(Dictionary<string, Flight> flightDictionary, D
 
 }
 
+//Advanced Feature (1) - Meenakshi 
+static void ProcessUnassignedFlights(Dictionary<string, Flight> flights, Dictionary<string, BoardingGate> boardingGates)
+{
+    Console.WriteLine("==================================================");
+    Console.WriteLine("Processing Unassigned Flights");
+    Console.WriteLine("==================================================");
+    Queue<Flight> unassignedFlights = new Queue<Flight>(flights.Values.Where(f => f.BoardingGate == null));
+    int unassignedFlightsCount = unassignedFlights.Count;
+    int unassignedGatesCount = boardingGates.Values.Count(g => g.Flight == null);
+    Console.WriteLine($"Total unassigned flights: {unassignedFlightsCount}");
+    Console.WriteLine($"Total unassigned boarding gates: {unassignedGatesCount}");
+    Console.WriteLine("--------------------------------------------------");
+
+    int processedCount = 0;
+    int assignedCount = 0;
+
+    Console.WriteLine("{0,-12} {1,-20} {2,-20} {3,-25} {4,-15} {5,-10}",
+        "Flight", "Origin", "Destination", "Time", "Special Request", "Gate");
+
+    while (unassignedFlights.Count > 0)
+    {
+        Flight flight = unassignedFlights.Dequeue();
+        BoardingGate matchingGate = FindMatchingGate(flight, boardingGates);
+
+        if (matchingGate != null)
+        {
+            matchingGate.Flight = flight;
+            flight.BoardingGate = matchingGate;
+
+            assignedCount++;
+        }
+
+        processedCount++;
+
+        Console.WriteLine("{0,-12} {1,-20} {2,-20} {3,-25:dd/MM/yyyy HH:mm} {4,-15} {5,-10}",
+         flight.FlightNumber,
+         flight.Origin,
+         flight.Destination,
+         flight.ExpectedTime,
+         flight.SpecialRequestCode ?? "N/A",
+         flight.BoardingGate?.GateName ?? "Not Assigned");  // Checking if BoardingGate is null
+
+    }
+
+    Console.WriteLine("--------------------------------------------------");
+    Console.WriteLine($"Total flights processed: {processedCount}");
+    Console.WriteLine($"Total gates assigned: {assignedCount}");
+    double automaticAssignmentPercentage = (double)assignedCount / flights.Count * 100;
+    Console.WriteLine($"Percentage of flights automatically assigned: {automaticAssignmentPercentage:F2}%");
+}
+
+static BoardingGate FindMatchingGate(Flight flight, Dictionary<string, BoardingGate> boardingGates)
+{
+    if (!string.IsNullOrEmpty(flight.SpecialRequestCode))
+    {
+        return boardingGates.Values.FirstOrDefault(g => g.Flight == null &&
+            ((flight.SpecialRequestCode == "CFFT" && g.SupportsCFFT) ||
+             (flight.SpecialRequestCode == "DDJB" && g.SupportsDDJB) ||
+             (flight.SpecialRequestCode == "LWTT" && g.SupportsLWTT)));
+    }
+    else
+    {
+        return boardingGates.Values.FirstOrDefault(g => g.Flight == null && !g.SupportsCFFT && !g.SupportsDDJB && !g.SupportsLWTT);
+    }
+}
+
+
 
 //PROGRAM CODE
 
@@ -784,6 +844,9 @@ Console.WriteLine("Loading Flights. . .");
 Dictionary<string, Flight> flightDictionary = LoadFlights("flights.csv");
 Console.WriteLine("{0} Flights Loaded!", flightDictionary.Count);
 
+// Define and initialize the flights and boardingGates dictionaries
+Dictionary<string, Flight> flights = new Dictionary<string, Flight>();
+Dictionary<string, BoardingGate> boardingGates = new Dictionary<string, BoardingGate>();
 
 
 
@@ -803,6 +866,7 @@ do
     Console.WriteLine("5. Display Airline Flights");
     Console.WriteLine("6. Modify Flight Details");
     Console.WriteLine("7. Display Flight Schedule");
+    Console.WriteLine("8. Display Unassigned flights");
     Console.WriteLine("0. Exit");
     Console.Write("\nPlease select your option: ");
 
@@ -829,6 +893,8 @@ do
         ModifyFlightDetails(airlineDictionary, flightDictionary);
     else if (option == "7")
         DisplayFlightSchedule(flightDictionary, airlineDictionary);
+    else if (option == "8")
+        ProcessUnassignedFlights(flights, boardingGates);
     else
     {
         Console.WriteLine("Goodbye!");
