@@ -509,7 +509,7 @@ static void DisplayAirlineFlights(Dictionary<string, Airline> airlineDictionary,
 
     // Get user input for airline code
     Console.Write("\nEnter Airline Code: ");
-    string airlineCode = Console.ReadLine().ToUpper(); 
+    string airlineCode = Console.ReadLine().ToUpper();
 
     // Check if the airline code exists in the dictionary
     if (airlineDictionary.TryGetValue(airlineCode, out Airline selectedAirline))
@@ -521,7 +521,15 @@ static void DisplayAirlineFlights(Dictionary<string, Airline> airlineDictionary,
         Console.WriteLine($"{"Flight Number",-15} {"Airline Name",-20} {"Origin",-20} {"Destination",-20} {"Expected Departure/Arrival Time",-30}");
 
         // Get the list of flights for the selected airline (convert AirlineCode to uppercase to avoid case mismatch)
-        var airlineFlights = flightDictionary.Values.Where(f => f.AirlineCode.ToUpper() == airlineCode).ToList();
+        List<Flight> airlineFlights = new List<Flight>();
+        foreach (KeyValuePair <string,Flight> flights in flightDictionary)
+        {
+            string Fobject = flights.Key;
+            if (Fobject.StartsWith(airlineCode))
+            {
+                airlineFlights.Add(flights.Value);
+            }
+        }
 
         // Check if there are any flights for the selected airline
         if (airlineFlights.Count == 0)
@@ -546,6 +554,7 @@ static void DisplayAirlineFlights(Dictionary<string, Airline> airlineDictionary,
     Console.WriteLine("\nPress any key to return to the menu...");
     Console.ReadKey();
 }
+
 
 //basic feature 8 -- Meenakshi
 
